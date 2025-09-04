@@ -99,7 +99,12 @@ export default function Home() {
               // Genkit can sometimes return an object directly or a stringified JSON.
               // We need to handle both cases.
               if (typeof result.parsedData === 'string') {
-                  parsedJson = JSON.parse(result.parsedData);
+                  // Attempt to fix common JSON issues before parsing
+                  let cleanJsonString = result.parsedData
+                    .replace(/```json/g, '')
+                    .replace(/```/g, '')
+                    .trim();
+                  parsedJson = JSON.parse(cleanJsonString);
               } else {
                   parsedJson = result.parsedData;
               }
@@ -211,6 +216,25 @@ export default function Home() {
       );
     }
     
+    if (normalizedHeader === 'engineeringstatus') {
+      const statuses = ["Completed", "In Progress", "Delayed", "Pending"];
+      return (
+        <Select
+          value={cellValue}
+          onValueChange={(value) => handleCellChange(rowIndex, header, value)}
+        >
+          <SelectTrigger className="w-full min-w-[150px]">
+            <SelectValue placeholder="Select status" />
+          </SelectTrigger>
+          <SelectContent>
+            {statuses.map(status => (
+              <SelectItem key={status} value={status}>{status}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      );
+    }
+
     if (normalizedHeader === 'procurement') {
       const statuses = ["Completed", "In Progress", "Delayed", "Pending"];
       return (
