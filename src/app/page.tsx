@@ -101,11 +101,23 @@ export default function Home() {
             try {
               let parsedJson;
               if (typeof result.parsedData === 'string') {
-                  let cleanJsonString = result.parsedData
-                    .replace(/```json/g, '')
-                    .replace(/```/g, '')
-                    .trim();
-                  parsedJson = JSON.parse(cleanJsonString);
+                  // This regex is designed to find a JSON array or object within a string,
+                  // even if it's embedded in markdown code blocks or other text.
+                  const jsonRegex = /```json\s*([\s\S]*?)\s*```|(\[[\s\S]*\]|\{[\s\S]*\})/m;
+                  const match = result.parsedData.match(jsonRegex);
+                  
+                  if (match) {
+                    // It will prioritize the content of a ```json block if present,
+                    // otherwise it will take the first standalone array or object.
+                    const cleanJsonString = match[1] || match[2];
+                    if (cleanJsonString) {
+                      parsedJson = JSON.parse(cleanJsonString);
+                    } else {
+                      throw new Error("Could not extract JSON from the response.");
+                    }
+                  } else {
+                     throw new Error("No valid JSON found in the response.");
+                  }
               } else {
                   parsedJson = result.parsedData;
               }
