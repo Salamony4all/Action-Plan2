@@ -18,6 +18,13 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 
@@ -39,7 +46,7 @@ const defaultData: ParsedData = [
     "Item": "1",
     "Description": "Example Task",
     "Engineering": format(new Date(), "yyyy-MM-dd"),
-    "Procurement": "2024-08-10",
+    "Procurement": "In Progress",
     "Execution_clearence": "2024-08-15",
     "Execution_start": "2024-08-20",
     "Execution_finish": "2024-08-30",
@@ -158,6 +165,8 @@ export default function Home() {
   };
 
   const renderCellContent = (rowIndex: number, header: string, cellValue: any) => {
+    const normalizedHeader = header.toLowerCase().replace(/ /g, '_');
+
     if (editingCell?.rowIndex === rowIndex && editingCell?.header === header) {
       return (
         <Input
@@ -181,8 +190,26 @@ export default function Home() {
       );
     }
     
-    const dateColumns = ["engineering", "procurement", "execution_clearence", "execution_start", "execution_finish"];
-    const normalizedHeader = header.toLowerCase().replace(/ /g, '_');
+    if (normalizedHeader === 'procurement') {
+      const statuses = ["Completed", "In Progress", "Delayed", "Pending"];
+      return (
+        <Select
+          value={cellValue}
+          onValueChange={(value) => handleCellChange(rowIndex, header, value)}
+        >
+          <SelectTrigger className="w-full min-w-[150px]">
+            <SelectValue placeholder="Select status" />
+          </SelectTrigger>
+          <SelectContent>
+            {statuses.map(status => (
+              <SelectItem key={status} value={status}>{status}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      );
+    }
+    
+    const dateColumns = ["engineering", "execution_clearence", "execution_start", "execution_finish"];
 
     if (dateColumns.includes(normalizedHeader) && isDateString(cellValue)) {
       return (
@@ -331,5 +358,3 @@ export default function Home() {
     </div>
   );
 }
-
-    
