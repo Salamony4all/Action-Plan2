@@ -321,23 +321,23 @@ export default function Home() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead rowSpan={2}>Item</TableHead>
-                <TableHead rowSpan={2}>Location</TableHead>
-                <TableHead rowSpan={2}>Activity</TableHead>
+                <TableHead rowSpan={2} className="text-center">Item</TableHead>
+                <TableHead rowSpan={2} className="text-center">Location</TableHead>
+                <TableHead rowSpan={2} className="text-center">Activity</TableHead>
                 <TableHead colSpan={2} className="text-center border-l border-r">Engineering</TableHead>
                 <TableHead colSpan={2} className="text-center border-r">Procurement</TableHead>
                 <TableHead colSpan={3} className="text-center border-r">Execution</TableHead>
-                <TableHead rowSpan={2}>Status</TableHead>
+                <TableHead rowSpan={2} className="text-center">Status</TableHead>
                 <TableHead rowSpan={2} className="w-[50px]"></TableHead>
               </TableRow>
               <TableRow>
-                <TableHead className="border-l">Status</TableHead>
-                <TableHead className="border-r">Date</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead className="border-r">Date</TableHead>
-                <TableHead>Clearence</TableHead>
-                <TableHead>Start</TableHead>
-                <TableHead className="border-r">Finish</TableHead>
+                <TableHead className="text-center border-l">Status</TableHead>
+                <TableHead className="text-center border-r">Date</TableHead>
+                <TableHead className="text-center">Status</TableHead>
+                <TableHead className="text-center border-r">Date</TableHead>
+                <TableHead className="text-center">Clearence</TableHead>
+                <TableHead className="text-center">Start</TableHead>
+                <TableHead className="text-center border-r">Finish</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -356,23 +356,23 @@ export default function Home() {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead rowSpan={2}>Item</TableHead>
-            <TableHead rowSpan={2}>Location</TableHead>
-            <TableHead rowSpan={2}>Activity</TableHead>
+            <TableHead rowSpan={2} className="text-center">Item</TableHead>
+            <TableHead rowSpan={2} className="text-center">Location</TableHead>
+            <TableHead rowSpan={2} className="text-center">Activity</TableHead>
             <TableHead colSpan={2} className="text-center border-l border-r">Engineering</TableHead>
             <TableHead colSpan={2} className="text-center border-r">Procurement</TableHead>
             <TableHead colSpan={3} className="text-center border-r">Execution</TableHead>
-            <TableHead rowSpan={2}>Status</TableHead>
+            <TableHead rowSpan={2} className="text-center">Status</TableHead>
             <TableHead rowSpan={2} className="w-[50px]"></TableHead>
           </TableRow>
           <TableRow>
-            <TableHead className="border-l">Status</TableHead>
-            <TableHead className="border-r">Date</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead className="border-r">Date</TableHead>
-            <TableHead>Clearence</TableHead>
-            <TableHead>Start</TableHead>
-            <TableHead className="border-r">Finish</TableHead>
+            <TableHead className="text-center border-l">Status</TableHead>
+            <TableHead className="text-center border-r">Date</TableHead>
+            <TableHead className="text-center">Status</TableHead>
+            <TableHead className="text-center border-r">Date</TableHead>
+            <TableHead className="text-center">Clearence</TableHead>
+            <TableHead className="text-center">Start</TableHead>
+            <TableHead className="text-center border-r">Finish</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
