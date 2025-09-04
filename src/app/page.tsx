@@ -87,14 +87,23 @@ export default function Home() {
             fileType: selectedFile.type || 'unknown',
           });
           
-          if (result.parsedData) {
+          if (result && result.parsedData) {
             try {
+              // The AI now returns a string that is already in JSON format.
+              // We need to parse it to get the array of objects.
               const parsedJson = JSON.parse(result.parsedData);
+
               if (Array.isArray(parsedJson)) {
-                setParsedData(parsedJson);
+                // Ensure all default headers exist in each row
+                const sanitizedData = parsedJson.map(row => {
+                  const newRow: Record<string, any> = {};
+                  for (const header of defaultHeaders) {
+                    newRow[header] = row[header] ?? '';
+                  }
+                  return newRow;
+                });
+                setParsedData(sanitizedData);
               } else {
-                // If the parsed data is not an array, we can't display it in the table.
-                // We'll show an error.
                 setError("Parsed data is not in a valid table format (array of objects).");
                 setParsedData(defaultData);
               }
@@ -104,6 +113,7 @@ export default function Home() {
                 variant: "default",
               });
             } catch (e) {
+              console.error("JSON Parsing Error:", e, "Raw Data:", result.parsedData);
               setError("Failed to parse the data from AI. The format might be incorrect.");
               setParsedData(defaultData);
             }
@@ -233,6 +243,8 @@ export default function Home() {
               selected={dateValue}
               onSelect={(date) => {
                 handleDateChange(rowIndex, header, date)
+                const popoverTrigger = document.querySelector(`[data-radix-popover-trigger][aria-expanded="true"]`) as HTMLElement | null;
+                popoverTrigger?.click();
               }}
               initialFocus
             />
@@ -268,6 +280,28 @@ export default function Home() {
   };
 
   const renderParsedData = (data: ParsedData) => {
+    if (!Array.isArray(data) || data.length === 0) {
+        // Render table with default headers and a message or an empty row
+        return (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                {defaultHeaders.map((header) => (
+                  <TableHead key={header} className="capitalize">{header.replace(/_/g, ' ')}</TableHead>
+                ))}
+                <TableHead className="w-[50px]"></TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+                <TableRow>
+                    <TableCell colSpan={defaultHeaders.length + 1} className="text-center">
+                        No data to display. Upload a file to get started.
+                    </TableCell>
+                </TableRow>
+            </TableBody>
+          </Table>
+        )
+    }
     const headers = defaultHeaders;
     return (
       <>
