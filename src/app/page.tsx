@@ -1,10 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, FileWarning, CheckCircle, File as FileIcon } from "lucide-react";
+import { Loader2, FileWarning, CheckCircle, FileText } from "lucide-react";
 import { intelligentDataParsing, type IntelligentDataParsingOutput } from "@/ai/flows/intelligent-data-parsing";
 
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Logo } from "@/components/icons";
@@ -91,7 +90,6 @@ export default function Home() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[50px]">#</TableHead>
               {headers.map((header) => (
                 <TableHead key={header} className="capitalize">{header.replace(/_/g, ' ')}</TableHead>
               ))}
@@ -100,7 +98,6 @@ export default function Home() {
           <TableBody>
             {data.map((item, index) => (
               <TableRow key={index}>
-                <TableCell>{index + 1}</TableCell>
                 {headers.map((header) => (
                   <TableCell key={header}>{String(item[header])}</TableCell>
                 ))}
@@ -140,7 +137,7 @@ export default function Home() {
             <Card className="shadow-md">
               <CardHeader>
                 <CardTitle className="text-xl flex items-center gap-2">
-                  <FileIcon className="w-5 h-5" /> Upload File
+                  <FileText className="w-5 h-5" /> Upload File
                 </CardTitle>
                 <CardDescription>Upload a file to automatically extract data.</CardDescription>
               </CardHeader>
