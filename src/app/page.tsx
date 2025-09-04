@@ -10,15 +10,13 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Logo } from "@/components/icons";
 import { FileUploader } from "@/components/file-uploader";
 import { useToast } from "@/hooks/use-toast";
-import { Separator } from "@/components/ui/separator";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableCaption } from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 type ParsedData = Record<string, any>[] | Record<string, any>;
 
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
   const [parsedData, setParsedData] = useState<ParsedData | null>(null);
-  const [parsingNotes, setParsingNotes] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
@@ -26,7 +24,6 @@ export default function Home() {
   const resetState = () => {
     setFile(null);
     setParsedData(null);
-    setParsingNotes(null);
     setError(null);
     setIsLoading(false);
   };
@@ -52,7 +49,6 @@ export default function Home() {
             try {
               const parsedJson = JSON.parse(result.parsedData);
               setParsedData(parsedJson);
-              setParsingNotes(result.parsingNotes);
               toast({
                 title: "Success",
                 description: "Data parsed successfully.",
@@ -60,11 +56,9 @@ export default function Home() {
               });
             } catch (e) {
               setError("Failed to parse the data from AI. The format might be incorrect.");
-              setParsingNotes(result.parsingNotes);
             }
           } else {
             setError("The AI could not parse any data from the file.");
-            setParsingNotes(result.parsingNotes);
           }
         } catch (e) {
           const errorMessage = e instanceof Error ? e.message : "An unknown error occurred during parsing.";
@@ -162,13 +156,12 @@ export default function Home() {
             </div>
           )}
 
-          {(parsingNotes || error) && !isLoading && (
-             <Alert variant={error ? 'destructive' : 'default'}>
-              {error ? <FileWarning className="h-4 w-4" /> : <CheckCircle className="h-4 w-4" />}
-              <AlertTitle>{error ? 'Parsing Issue' : 'Parsing Notes'}</AlertTitle>
-              <AlertDescription className="prose prose-sm max-w-none">
-                <p>{error || parsingNotes}</p>
-                {error && parsingNotes && <p className="mt-2"><strong>Additional Notes:</strong> {parsingNotes}</p>}
+          {error && !isLoading && (
+             <Alert variant='destructive'>
+              <FileWarning className="h-4 w-4" />
+              <AlertTitle>Parsing Issue</AlertTitle>
+              <AlertDescription>
+                <p>{error}</p>
               </AlertDescription>
             </Alert>
           )}
