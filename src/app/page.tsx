@@ -34,6 +34,7 @@ const defaultHeaders = [
   'Item',
   'Location',
   'Activity',
+  'Engineering Status',
   'Engineering',
   'Procurement',
   'Execution_clearence',
@@ -47,6 +48,7 @@ const defaultData: ParsedData = [
     "Item": "1",
     "Location": "Example Location",
     "Activity": "Example Activity",
+    "Engineering Status": "Pending",
     "Engineering": format(new Date(), "yyyy-MM-dd"),
     "Procurement": "In Progress",
     "Execution_clearence": "2024-08-15",
@@ -182,7 +184,7 @@ export default function Home() {
   };
 
   const renderCellContent = (rowIndex: number, header: string, cellValue: any) => {
-    const normalizedHeader = header.toLowerCase().replace(/_/g, '_');
+    const normalizedHeader = header.toLowerCase().replace(/_/g, ' ').replace(/ /g, '');
 
     if (editingCell?.rowIndex === rowIndex && editingCell?.header === header) {
       return (
@@ -226,7 +228,7 @@ export default function Home() {
       );
     }
     
-    const dateColumns = ["engineering", "execution_clearence", "execution_start", "execution_finish"];
+    const dateColumns = ["engineering", "executionclearence", "executionstart", "executionfinish"];
 
     if (dateColumns.includes(normalizedHeader)) {
       const dateValue = isDateString(cellValue) ? new Date(cellValue) : undefined;
