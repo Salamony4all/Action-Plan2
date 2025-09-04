@@ -40,8 +40,7 @@ const defaultHeaders = [
   'Procurement Date',
   'Execution_clearence',
   'Execution_start',
-  'Execution_finish',
-  'Status'
+  'Execution_finish'
 ];
 
 const defaultData: ParsedData = [
@@ -55,8 +54,7 @@ const defaultData: ParsedData = [
     "Procurement Date": format(new Date(), "yyyy-MM-dd"),
     "Execution_clearence": "2024-08-15",
     "Execution_start": "2024-08-20",
-    "Execution_finish": "2024-08-30",
-    "Status": "Not Started"
+    "Execution_finish": "2024-08-30"
   }
 ];
 
@@ -327,7 +325,6 @@ export default function Home() {
                 <TableHead colSpan={2} className="text-center border-l border-r">Engineering</TableHead>
                 <TableHead colSpan={2} className="text-center border-r">Procurement</TableHead>
                 <TableHead colSpan={3} className="text-center border-r">Execution</TableHead>
-                <TableHead rowSpan={2} className="text-center">Status</TableHead>
                 <TableHead rowSpan={2} className="w-[50px]"></TableHead>
               </TableRow>
               <TableRow>
@@ -362,7 +359,6 @@ export default function Home() {
             <TableHead colSpan={2} className="text-center border-l border-r">Engineering</TableHead>
             <TableHead colSpan={2} className="text-center border-r">Procurement</TableHead>
             <TableHead colSpan={3} className="text-center border-r">Execution</TableHead>
-            <TableHead rowSpan={2} className="text-center">Status</TableHead>
             <TableHead rowSpan={2} className="w-[50px]"></TableHead>
           </TableRow>
           <TableRow>
