@@ -3,8 +3,8 @@ import { Toaster } from "@/components/ui/toaster"
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'TabularView',
-  description: 'Upload, parse, and edit tabular data from any file.',
+  title: 'NCSI Action Plan',
+  description: 'Track and manage action plans with NCSI Action Plan.',
 };
 
 export default function RootLayout({
