@@ -40,7 +40,9 @@ const prompt = ai.definePrompt({
 
 You will receive a file as a data URI, its file type, and optionally a delimiter.
 
-Your goal is to extract the tabular data from the file and return it in JSON format.  You should handle incomplete and messy data gracefully, making reasonable assumptions where necessary.
+Your goal is to extract the tabular data from the file and return it in JSON format. You should handle incomplete and messy data gracefully, making reasonable assumptions where necessary.
+
+When you identify a date in the source data, you MUST format it as 'yyyy-MM-dd'. Do not use any other date format.
 
 If a delimiter is provided, use it to separate the fields in the file. If not, infer the delimiter based on the file type and content.
 
@@ -50,7 +52,7 @@ Here is the file data:
 File Type: {{{fileType}}}
 Delimiter (if applicable): {{{delimiter}}}
 
-Return the parsed data in JSON format, and include notes on the parsing process, including any issues encountered and how they were handled.  Be as informative as possible.
+Return the parsed data in JSON format, and include notes on the parsing process, including any issues encountered and how they were handled. Be as informative as possible.
 
 Ensure that the returned JSON is valid and represents the tabular data accurately.
 `,
