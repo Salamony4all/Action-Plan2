@@ -1,45 +1,30 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Download, Loader2, FileWarning, CheckCircle, File as FileIcon } from "lucide-react";
+import { useState } from "react";
+import { Loader2, FileWarning, CheckCircle, File as FileIcon } from "lucide-react";
 import { intelligentDataParsing, type IntelligentDataParsingOutput } from "@/ai/flows/intelligent-data-parsing";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Logo } from "@/components/icons";
 import { FileUploader } from "@/components/file-uploader";
-import { DataTable } from "@/components/data-table";
 import { useToast } from "@/hooks/use-toast";
+import { Separator } from "@/components/ui/separator";
 
-type TableRowData = Record<string, any>;
+type ParsedData = Record<string, any>[] | Record<string, any>;
 
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
-  const [tableData, setTableData] = useState<TableRowData[] | null>(null);
-  const [headers, setHeaders] = useState<string[]>([]);
+  const [parsedData, setParsedData] = useState<ParsedData | null>(null);
   const [parsingNotes, setParsingNotes] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
 
-  useEffect(() => {
-    if (tableData && tableData.length > 0) {
-      setHeaders(Object.keys(tableData[0]));
-    } else {
-      setHeaders([]);
-    }
-  }, [tableData]);
-
   const resetState = () => {
     setFile(null);
-    setTableData(null);
+    setParsedData(null);
     setParsingNotes(null);
     setError(null);
     setIsLoading(false);
@@ -65,18 +50,13 @@ export default function Home() {
           if (result.parsedData) {
             try {
               const parsedJson = JSON.parse(result.parsedData);
-              if (Array.isArray(parsedJson) && parsedJson.length > 0) {
-                setTableData(parsedJson);
-                setParsingNotes(result.parsingNotes);
-                toast({
-                  title: "Success",
-                  description: "Data parsed successfully.",
-                  variant: "default",
-                });
-              } else {
-                setError("Parsed data is not in a valid array format or is empty.");
-                setParsingNotes(result.parsingNotes);
-              }
+              setParsedData(parsedJson);
+              setParsingNotes(result.parsingNotes);
+              toast({
+                title: "Success",
+                description: "Data parsed successfully.",
+                variant: "default",
+              });
             } catch (e) {
               setError("Failed to parse the data from AI. The format might be incorrect.");
               setParsingNotes(result.parsingNotes);
@@ -109,44 +89,28 @@ export default function Home() {
     }
   };
 
-  const handleDownload = (format: 'csv' | 'json') => {
-    if (!tableData) return;
-
-    let content = "";
-    let mimeType = "";
-    let fileExtension = "";
-
-    if (format === 'json') {
-      content = JSON.stringify(tableData, null, 2);
-      mimeType = "application/json";
-      fileExtension = "json";
-    } else { // csv
-      const csvHeaders = headers.join(',');
-      const csvRows = tableData.map(row =>
-        headers.map(header => {
-          const value = String(row[header] ?? '');
-          return `"${value.replace(/"/g, '""')}"`;
-        }).join(',')
-      ).join('\n');
-      content = `${csvHeaders}\n${csvRows}`;
-      mimeType = "text/csv";
-      fileExtension = "csv";
+  const renderParsedData = (data: ParsedData) => {
+    if (Array.isArray(data)) {
+      return data.map((item, index) => (
+        <div key={index}>
+          {Object.entries(item).map(([key, value]) => (
+            <div key={key} className="grid grid-cols-3 gap-2 py-2">
+              <span className="font-semibold capitalize text-muted-foreground">{key.replace(/_/g, ' ')}</span>
+              <span className="col-span-2 text-foreground">{String(value)}</span>
+            </div>
+          ))}
+          {index < data.length - 1 && <Separator />}
+        </div>
+      ));
     }
-
-    const blob = new Blob([content], { type: mimeType });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `edited_data.${fileExtension}`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-    toast({
-      title: "Download Started",
-      description: `Your file is downloading as ${fileExtension.toUpperCase()}.`,
-    });
+    return Object.entries(data).map(([key, value]) => (
+       <div key={key} className="grid grid-cols-3 gap-2 py-2">
+        <span className="font-semibold capitalize text-muted-foreground">{key.replace(/_/g, ' ')}</span>
+        <span className="col-span-2 text-foreground">{String(value)}</span>
+      </div>
+    ));
   };
+
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground font-body">
@@ -170,7 +134,7 @@ export default function Home() {
               </CardContent>
             </Card>
 
-          {isLoading && !tableData && (
+          {isLoading && !parsedData && (
             <div className="flex items-center justify-center gap-3 text-lg font-medium text-primary">
               <Loader2 className="w-8 h-8 animate-spin" />
               <span>Parsing your data...</span>
@@ -188,26 +152,15 @@ export default function Home() {
             </Alert>
           )}
 
-          {tableData && (
+          {parsedData && (
             <Card className="shadow-md">
               <CardHeader>
-                <CardTitle className="text-xl">Preview and Edit Data</CardTitle>
-                <CardDescription>Your extracted data is below. You can edit cells directly. Clean up any mistakes before downloading.</CardDescription>
+                <CardTitle className="text-xl">Extracted Data</CardTitle>
+                <CardDescription>Below is the data extracted from your file.</CardDescription>
               </CardHeader>
-              <CardContent>
-                <DataTable data={tableData} headers={headers} onDataChange={setTableData} isLoading={isLoading} />
+              <CardContent className="text-sm">
+                {renderParsedData(parsedData)}
               </CardContent>
-              <CardFooter className="justify-end">
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button><Download className="mr-2 h-4 w-4" /> Download Data</Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem onClick={() => handleDownload('csv')}>Download as CSV</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleDownload('json')}>Download as JSON</DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </CardFooter>
             </Card>
           )}
 
