@@ -89,9 +89,14 @@ export default function Home() {
           
           if (result && result.parsedData) {
             try {
-              // The AI now returns a string that is already in JSON format.
-              // We need to parse it to get the array of objects.
-              const parsedJson = JSON.parse(result.parsedData);
+              let parsedJson;
+              // Genkit can sometimes return an object directly or a stringified JSON.
+              // We need to handle both cases.
+              if (typeof result.parsedData === 'string') {
+                  parsedJson = JSON.parse(result.parsedData);
+              } else {
+                  parsedJson = result.parsedData;
+              }
 
               if (Array.isArray(parsedJson)) {
                 // Ensure all default headers exist in each row
@@ -175,7 +180,7 @@ export default function Home() {
   };
 
   const renderCellContent = (rowIndex: number, header: string, cellValue: any) => {
-    const normalizedHeader = header.toLowerCase().replace(/ /g, '_');
+    const normalizedHeader = header.toLowerCase().replace(/_/g, '_');
 
     if (editingCell?.rowIndex === rowIndex && editingCell?.header === header) {
       return (
