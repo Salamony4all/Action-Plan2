@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Download, Loader2, FileWarning, CheckCircle } from "lucide-react";
+import { Download, Loader2, FileWarning, CheckCircle, Wand2 } from "lucide-react";
 import { intelligentDataParsing, type IntelligentDataParsingOutput } from "@/ai/flows/intelligent-data-parsing";
 
 import { Button } from "@/components/ui/button";
@@ -16,6 +16,7 @@ import {
 import { Logo } from "@/components/icons";
 import { FileUploader } from "@/components/file-uploader";
 import { DataTable } from "@/components/data-table";
+import { PromptedTableCreator } from "@/components/prompted-table-creator";
 import { useToast } from "@/hooks/use-toast";
 
 type TableRowData = Record<string, any>;
@@ -43,6 +44,26 @@ export default function Home() {
     setParsingNotes(null);
     setError(null);
     setIsLoading(false);
+  };
+
+  const handleTableCreated = (data: TableRowData[], notes?: string) => {
+    resetState();
+    if (data.length > 0) {
+      setTableData(data);
+      if (notes) {
+        setParsingNotes(notes);
+      }
+      toast({
+        title: "Success",
+        description: "Table created successfully.",
+        variant: "default",
+      });
+    } else {
+      setError("The AI could not create a table from your prompt.");
+      if (notes) {
+        setParsingNotes(notes);
+      }
+    }
   };
 
   const handleFileSelect = async (selectedFile: File) => {
@@ -158,17 +179,23 @@ export default function Home() {
       </header>
       <main className="flex-1 container mx-auto p-4 md:p-8">
         <div className="max-w-5xl mx-auto grid gap-8">
-          <Card className="shadow-md">
-            <CardHeader>
-              <CardTitle className="text-xl">1. Upload File</CardTitle>
-              <CardDescription>Upload a file (CSV, TXT, JSON, etc.) to extract and recognize its data.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <FileUploader onFileSelect={handleFileSelect} onFileRemove={resetState} selectedFile={file} acceptedFileTypes="*/*" />
-            </CardContent>
-          </Card>
+          <div className="grid md:grid-cols-2 gap-8">
+            <Card className="shadow-md">
+              <CardHeader>
+                <CardTitle className="text-xl flex items-center gap-2">
+                  <FileIcon className="w-5 h-5" /> 1. Upload File
+                </CardTitle>
+                <CardDescription>Upload a file (e.g., CSV, TXT, JSON) to automatically extract data.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <FileUploader onFileSelect={handleFileSelect} onFileRemove={resetState} selectedFile={file} acceptedFileTypes=".csv,.txt,.json" />
+              </CardContent>
+            </Card>
 
-          {isLoading && (
+            <PromptedTableCreator onTableCreated={handleTableCreated} setIsLoading={setIsLoading} setError={setError} />
+          </div>
+
+          {isLoading && !tableData && (
             <div className="flex items-center justify-center gap-3 text-lg font-medium text-primary">
               <Loader2 className="w-8 h-8 animate-spin" />
               <span>Parsing your data...</span>
@@ -186,10 +213,10 @@ export default function Home() {
             </Alert>
           )}
 
-          {tableData && !isLoading && (
+          {tableData && (
             <Card className="shadow-md">
               <CardHeader>
-                <CardTitle className="text-xl">2. Preview and Edit Data</CardTitle>
+                <CardTitle className="text-xl">Preview and Edit Data</CardTitle>
                 <CardDescription>Your extracted data is below. You can edit cells directly. Clean up any mistakes before downloading.</CardDescription>
               </CardHeader>
               <CardContent>

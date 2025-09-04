@@ -43,7 +43,7 @@ export function FileUploader({
   };
 
   const handleDrop = useCallback(
-    (e: DragEvent<HTMLDivElement>) => {
+    (e: DragEvent<HTMLDivElement>)_=> {
       e.preventDefault();
       e.stopPropagation();
       setIsDragging(false);
@@ -88,7 +88,7 @@ export function FileUploader({
       <p className="mt-4 text-center text-muted-foreground">
         <span className="font-semibold text-primary">Click to upload</span> or drag and drop
       </p>
-      <p className="text-xs text-muted-foreground mt-1">Any file type (CSV, TXT, JSON, XLSX, PDF, etc.)</p>
+      <p className="text-xs text-muted-foreground mt-1">CSV, TXT, or JSON files</p>
       <input
         type="file"
         id="file-upload"
