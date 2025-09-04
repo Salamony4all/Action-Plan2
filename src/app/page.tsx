@@ -211,7 +211,8 @@ export default function Home() {
     
     const dateColumns = ["engineering", "execution_clearence", "execution_start", "execution_finish"];
 
-    if (dateColumns.includes(normalizedHeader) && isDateString(cellValue)) {
+    if (dateColumns.includes(normalizedHeader)) {
+      const dateValue = isDateString(cellValue) ? new Date(cellValue) : undefined;
       return (
         <Popover>
           <PopoverTrigger asChild>
@@ -219,17 +220,17 @@ export default function Home() {
               variant={"outline"}
               className={cn(
                 "w-full min-w-[150px] justify-start text-left font-normal",
-                !cellValue && "text-muted-foreground"
+                !dateValue && "text-muted-foreground"
               )}
             >
               <CalendarIcon className="mr-2 h-4 w-4" />
-              {format(new Date(cellValue), "PPP")}
+              {dateValue ? format(dateValue, "PPP") : <span>Pick a date</span>}
             </Button>
           </PopoverTrigger>
           <PopoverContent className="w-auto p-0">
             <Calendar
               mode="single"
-              selected={new Date(cellValue)}
+              selected={dateValue}
               onSelect={(date) => {
                 handleDateChange(rowIndex, header, date)
               }}
@@ -239,6 +240,7 @@ export default function Home() {
         </Popover>
       );
     }
+
 
     return (
       <div onClick={() => setEditingCell({rowIndex, header})} className="min-h-[2.5rem] flex items-center">
@@ -254,6 +256,8 @@ export default function Home() {
         acc[header] = '';
         return acc;
       }, {} as Record<string, any>);
+      // Add a unique ID to the new row
+      newRow.id = `new-row-${Date.now()}`;
       setParsedData([...parsedData, newRow]);
     }
   };
@@ -280,7 +284,7 @@ export default function Home() {
         </TableHeader>
         <TableBody>
           {data.map((item, index) => (
-            <TableRow key={index}>
+            <TableRow key={item.id || index}>
               {headers.map((header) => (
                 <TableCell key={header}>
                   {renderCellContent(index, header, item[header])}
