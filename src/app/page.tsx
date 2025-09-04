@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, FileWarning, CheckCircle, FileText } from "lucide-react";
+import { Loader2, FileWarning, Calendar as CalendarIcon, FileText } from "lucide-react";
+import { format } from "date-fns";
 import { intelligentDataParsing, type IntelligentDataParsingOutput } from "@/ai/flows/intelligent-data-parsing";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,6 +11,15 @@ import { Logo } from "@/components/icons";
 import { FileUploader } from "@/components/file-uploader";
 import { useToast } from "@/hooks/use-toast";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+
 
 type ParsedData = Record<string, any>[] | Record<string, any>;
 
@@ -83,6 +93,28 @@ export default function Home() {
     }
   };
 
+  const handleDateChange = (rowIndex: number, header: string, date: Date | undefined) => {
+    if (Array.isArray(parsedData)) {
+      const newData = [...parsedData];
+      if(date) {
+        newData[rowIndex][header] = format(date, "yyyy-MM-dd");
+        setParsedData(newData);
+      }
+    }
+  };
+
+  const isDate = (s: string) => {
+    if (s === null || s === 'null') return false;
+    try {
+      // Check if it's a valid date string that can be parsed
+      const d = new Date(s);
+      return d instanceof Date && !isNaN(d.getTime()) && s.match(/\d{4}-\d{2}-\d{2}|\d{1,2}-[a-zA-Z]{3}-\d{2,4}|date/i) !== null;
+    } catch (e) {
+      return false;
+    }
+  };
+
+
   const renderParsedData = (data: ParsedData) => {
     if (Array.isArray(data) && data.length > 0) {
       const headers = Object.keys(data[0]);
@@ -98,16 +130,45 @@ export default function Home() {
           <TableBody>
             {data.map((item, index) => (
               <TableRow key={index}>
-                {headers.map((header) => (
-                  <TableCell key={header}>{String(item[header])}</TableCell>
-                ))}
+                {headers.map((header) => {
+                  const cellValue = item[header];
+                  if (isDate(cellValue)) {
+                    return (
+                      <TableCell key={header}>
+                        <Popover>
+                          <PopoverTrigger asChild>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "w-[150px] justify-start text-left font-normal",
+                                !cellValue && "text-muted-foreground"
+                              )}
+                            >
+                              <CalendarIcon className="mr-2 h-4 w-4" />
+                              {cellValue ? format(new Date(cellValue), "PPP") : <span>Pick a date</span>}
+                            </Button>
+                          </PopoverTrigger>
+                          <PopoverContent className="w-auto p-0">
+                            <Calendar
+                              mode="single"
+                              selected={cellValue ? new Date(cellValue) : undefined}
+                              onSelect={(date) => handleDateChange(index, header, date)}
+                              initialFocus
+                            />
+                          </PopoverContent>
+                        </Popover>
+                      </TableCell>
+                    );
+                  }
+                  return <TableCell key={header}>{String(cellValue)}</TableCell>
+                })}
               </TableRow>
             ))}
           </TableBody>
         </Table>
       );
     }
-    if (!Array.isArray(data)) {
+    if (!Array.isArray(data) && data) {
         return (
             <div className="space-y-2">
                 {Object.entries(data).map(([key, value]) => (
