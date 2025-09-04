@@ -164,7 +164,7 @@ export default function Home() {
               <CardDescription>Upload a file (CSV, TXT, JSON, etc.) to extract and recognize its data.</CardDescription>
             </CardHeader>
             <CardContent>
-              <FileUploader onFileSelect={handleFileSelect} onFileRemove={resetState} selectedFile={file} />
+              <FileUploader onFileSelect={handleFileSelect} onFileRemove={resetState} selectedFile={file} acceptedFileTypes="*/*" />
             </CardContent>
           </Card>
 
