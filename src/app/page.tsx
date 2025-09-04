@@ -5,12 +5,13 @@ import { Loader2, FileWarning, CheckCircle, File as FileIcon } from "lucide-reac
 import { intelligentDataParsing, type IntelligentDataParsingOutput } from "@/ai/flows/intelligent-data-parsing";
 
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Logo } from "@/components/icons";
 import { FileUploader } from "@/components/file-uploader";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableCaption } from "@/components/ui/table";
 
 type ParsedData = Record<string, any>[] | Record<string, any>;
 
@@ -90,25 +91,45 @@ export default function Home() {
   };
 
   const renderParsedData = (data: ParsedData) => {
-    if (Array.isArray(data)) {
-      return data.map((item, index) => (
-        <div key={index}>
-          {Object.entries(item).map(([key, value]) => (
-            <div key={key} className="grid grid-cols-3 gap-2 py-2">
-              <span className="font-semibold capitalize text-muted-foreground">{key.replace(/_/g, ' ')}</span>
-              <span className="col-span-2 text-foreground">{String(value)}</span>
-            </div>
-          ))}
-          {index < data.length - 1 && <Separator />}
-        </div>
-      ));
+    if (Array.isArray(data) && data.length > 0) {
+      const headers = Object.keys(data[0]);
+      return (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[50px]">#</TableHead>
+              {headers.map((header) => (
+                <TableHead key={header} className="capitalize">{header.replace(/_/g, ' ')}</TableHead>
+              ))}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {data.map((item, index) => (
+              <TableRow key={index}>
+                <TableCell>{index + 1}</TableCell>
+                {headers.map((header) => (
+                  <TableCell key={header}>{String(item[header])}</TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      );
     }
-    return Object.entries(data).map(([key, value]) => (
-       <div key={key} className="grid grid-cols-3 gap-2 py-2">
-        <span className="font-semibold capitalize text-muted-foreground">{key.replace(/_/g, ' ')}</span>
-        <span className="col-span-2 text-foreground">{String(value)}</span>
-      </div>
-    ));
+    if (!Array.isArray(data)) {
+        return (
+            <div className="space-y-2">
+                {Object.entries(data).map(([key, value]) => (
+                    <div key={key} className="grid grid-cols-3 gap-4 items-start">
+                        <span className="font-semibold capitalize text-muted-foreground">{key.replace(/_/g, ' ')}</span>
+                        <span className="col-span-2 text-foreground">{String(value)}</span>
+                    </div>
+                ))}
+            </div>
+        );
+    }
+
+    return <p>No data to display.</p>;
   };
 
 
@@ -127,7 +148,7 @@ export default function Home() {
                 <CardTitle className="text-xl flex items-center gap-2">
                   <FileIcon className="w-5 h-5" /> Upload File
                 </CardTitle>
-                <CardDescription>Upload a file (e.g., CSV, TXT, JSON, PDF, XLS) to automatically extract data.</CardDescription>
+                <CardDescription>Upload a file to automatically extract data.</CardDescription>
               </CardHeader>
               <CardContent>
                 <FileUploader onFileSelect={handleFileSelect} onFileRemove={resetState} selectedFile={file} acceptedFileTypes=".csv,.txt,.json,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
@@ -163,7 +184,6 @@ export default function Home() {
               </CardContent>
             </Card>
           )}
-
         </div>
       </main>
       <footer className="py-4 text-center text-sm text-muted-foreground border-t">
