@@ -256,8 +256,6 @@ export default function Home() {
         acc[header] = '';
         return acc;
       }, {} as Record<string, any>);
-      // Add a unique ID to the new row
-      newRow.id = `new-row-${Date.now()}`;
       setParsedData([...parsedData, newRow]);
     }
   };
@@ -284,7 +282,7 @@ export default function Home() {
         </TableHeader>
         <TableBody>
           {data.map((item, index) => (
-            <TableRow key={item.id || index}>
+            <TableRow key={index}>
               {headers.map((header) => (
                 <TableCell key={header}>
                   {renderCellContent(index, header, item[header])}
