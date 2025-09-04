@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useCallback, type ChangeEvent, type DragEvent } from "react";
@@ -43,7 +44,7 @@ export function FileUploader({
   };
 
   const handleDrop = useCallback(
-    (e: DragEvent<HTMLDivElement>)_=> {
+    (e: DragEvent<HTMLDivElement>) => {
       e.preventDefault();
       e.stopPropagation();
       setIsDragging(false);

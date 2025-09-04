@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Download, Loader2, FileWarning, CheckCircle, Wand2 } from "lucide-react";
+import { Download, Loader2, FileWarning, CheckCircle, Wand2, File as FileIcon } from "lucide-react";
 import { intelligentDataParsing, type IntelligentDataParsingOutput } from "@/ai/flows/intelligent-data-parsing";
 
 import { Button } from "@/components/ui/button";
@@ -188,7 +188,7 @@ export default function Home() {
                 <CardDescription>Upload a file (e.g., CSV, TXT, JSON) to automatically extract data.</CardDescription>
               </CardHeader>
               <CardContent>
-                <FileUploader onFileSelect={handleFileSelect} onFileRemove={resetState} selectedFile={file} acceptedFileTypes=".csv,.txt,.json" />
+                <FileUploader onFileSelect={handleFileSelect} onFileRemove={resetState} selectedFile={file} acceptedFileTypes=".csv,.txt,.json,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
               </CardContent>
             </Card>
 
