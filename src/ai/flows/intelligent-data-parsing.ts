@@ -46,7 +46,7 @@ The target table has the following headers: "Item", "Location", "Activity", "Eng
 
 Map the data from the source file to these target headers. For example, a column named "Task Name" in the source should be mapped to the "Activity" header in the output. A column named "Start Date" should be mapped to "Execution_start".
 
-When you identify a date in the source data, you must parse it and format it as 'yyyy-MM-dd'. You should be able to handle various date formats, including but not limited to 'dd/MM/yyyy', 'MM/dd/yyyy', 'yyyy-MM-dd', 'dd-MMM-yy', 'Month dd, yyyy', etc. Always convert any recognized date into the 'yyyy-MM-dd' format in the final JSON output.
+When you identify a date in the source data, you must parse it and format it as 'yyyy-MM-dd'. Use the exact dates from the source file. You should be able to handle various date formats, including but not limited to 'dd/MM/yyyy', 'MM/dd/yyyy', 'yyyy-MM-dd', 'dd-MMM-yy', 'Month dd, yyyy', etc. Always convert any recognized date into the 'yyyy-MM-dd' format in the final JSON output.
 
 If a delimiter is provided, use it to separate the fields in the file. If not, infer the delimiter based on the file type and content.
 
