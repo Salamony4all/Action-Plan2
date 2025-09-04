@@ -19,7 +19,6 @@ type ParsedData = Record<string, any>[];
 
 const defaultHeaders = [
   'SN',
-  'Zone',
   'Location',
   'Activity',
   'Engineering Status',
@@ -34,7 +33,6 @@ const defaultHeaders = [
 const defaultData: ParsedData = [
   {
     "SN": "1",
-    "Zone": "Example Zone",
     "Location": "Example Location",
     "Activity": "Example Activity",
     "Engineering Status": "Pending",
@@ -57,13 +55,13 @@ export default function Home() {
 
   const processDataWithSerialNumbers = (data: ParsedData) => {
     let serialNumber = 1;
-    let currentZone = '';
+    let currentLocation = '';
     return data.map((row, index) => {
       if (index === 0) {
-        currentZone = row['Zone'];
+        currentLocation = row['Location'];
         serialNumber = 1;
-      } else if (row['Zone'] !== currentZone) {
-        currentZone = row['Zone'];
+      } else if (row['Location'] !== currentLocation) {
+        currentLocation = row['Location'];
         serialNumber = 1;
       } else {
         serialNumber++;
@@ -248,7 +246,6 @@ export default function Home() {
             <TableHeader>
               <TableRow>
                 <TableHead rowSpan={2} className="text-center">SN</TableHead>
-                <TableHead rowSpan={2} className="text-center">Zone</TableHead>
                 <TableHead rowSpan={2} className="text-center">Location</TableHead>
                 <TableHead rowSpan={2} className="text-center">Activity</TableHead>
                 <TableHead colSpan={2} className="text-center border-l border-r">Engineering</TableHead>
@@ -284,7 +281,6 @@ export default function Home() {
         <TableHeader>
           <TableRow>
             <TableHead rowSpan={2} className="text-center">SN</TableHead>
-            <TableHead rowSpan={2} className="text-center">Zone</TableHead>
             <TableHead rowSpan={2} className="text-center">Location</TableHead>
             <TableHead rowSpan={2} className="text-center">Activity</TableHead>
             <TableHead colSpan={2} className="text-center border-l border-r">Engineering</TableHead>
