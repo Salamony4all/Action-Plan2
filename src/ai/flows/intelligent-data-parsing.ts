@@ -54,7 +54,7 @@ Delimiter (if applicable): {{{delimiter}}}
 
 Return the parsed data in JSON format, and include notes on the parsing process, including any issues encountered and how they were handled. Be as informative as possible.
 
-Ensure that the returned JSON is valid and represents the tabular data accurately.
+Ensure that the returned JSON is valid and represents the tabular data accurately, and that dates are consistently formatted as 'yyyy-MM-dd'.
 `,
 });
 
