@@ -89,7 +89,7 @@ export function FileUploader({
       <p className="mt-4 text-center text-muted-foreground">
         <span className="font-semibold text-primary">Click to upload</span> or drag and drop
       </p>
-      <p className="text-xs text-muted-foreground mt-1">CSV, TXT, or JSON files</p>
+      <p className="text-xs text-muted-foreground mt-1">Any file type (PDF, XLS, CSV, etc.)</p>
       <input
         type="file"
         id="file-upload"
