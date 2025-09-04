@@ -297,10 +297,23 @@ export default function Home() {
           <Table>
             <TableHeader>
               <TableRow>
-                {defaultHeaders.map((header) => (
-                  <TableHead key={header} className="capitalize">{header.replace(/_/g, ' ')}</TableHead>
-                ))}
-                <TableHead className="w-[50px]"></TableHead>
+                <TableHead rowSpan={2}>Item</TableHead>
+                <TableHead rowSpan={2}>Location</TableHead>
+                <TableHead rowSpan={2}>Activity</TableHead>
+                <TableHead colSpan={2} className="text-center border-l border-r">Engineering</TableHead>
+                <TableHead colSpan={2} className="text-center border-r">Procurement</TableHead>
+                <TableHead colSpan={3} className="text-center border-r">Execution</TableHead>
+                <TableHead rowSpan={2}>Status</TableHead>
+                <TableHead rowSpan={2} className="w-[50px]"></TableHead>
+              </TableRow>
+              <TableRow>
+                <TableHead className="border-l">Engineering Status</TableHead>
+                <TableHead className="border-r">Engineering</TableHead>
+                <TableHead>Procurement</TableHead>
+                <TableHead className="border-r">Procurement Date</TableHead>
+                <TableHead>Execution Clearence</TableHead>
+                <TableHead>Execution Start</TableHead>
+                <TableHead className="border-r">Execution Finish</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -319,10 +332,23 @@ export default function Home() {
       <Table>
         <TableHeader>
           <TableRow>
-            {headers.map((header) => (
-              <TableHead key={header} className="capitalize">{header.replace(/_/g, ' ')}</TableHead>
-            ))}
-            <TableHead className="w-[50px]"></TableHead>
+            <TableHead rowSpan={2}>Item</TableHead>
+            <TableHead rowSpan={2}>Location</TableHead>
+            <TableHead rowSpan={2}>Activity</TableHead>
+            <TableHead colSpan={2} className="text-center border-l border-r">Engineering</TableHead>
+            <TableHead colSpan={2} className="text-center border-r">Procurement</TableHead>
+            <TableHead colSpan={3} className="text-center border-r">Execution</TableHead>
+            <TableHead rowSpan={2}>Status</TableHead>
+            <TableHead rowSpan={2} className="w-[50px]"></TableHead>
+          </TableRow>
+          <TableRow>
+            <TableHead className="border-l">Engineering Status</TableHead>
+            <TableHead className="border-r">Engineering</TableHead>
+            <TableHead>Procurement</TableHead>
+            <TableHead className="border-r">Procurement Date</TableHead>
+            <TableHead>Execution Clearence</TableHead>
+            <TableHead>Execution Start</TableHead>
+            <TableHead className="border-r">Execution Finish</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
