@@ -144,7 +144,10 @@ export default function Home() {
       );
     }
     
-    if (isDateString(cellValue)) {
+    const dateColumns = ["engineering", "execution_clearence", "execution_start", "execution_finish"];
+    const normalizedHeader = header.toLowerCase().replace(/ /g, '_');
+
+    if (dateColumns.includes(normalizedHeader) && isDateString(cellValue)) {
       return (
         <Popover>
           <PopoverTrigger asChild>
