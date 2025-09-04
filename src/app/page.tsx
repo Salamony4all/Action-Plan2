@@ -37,6 +37,7 @@ const defaultHeaders = [
   'Engineering Status',
   'Engineering',
   'Procurement',
+  'Procurement Date',
   'Execution_clearence',
   'Execution_start',
   'Execution_finish',
@@ -51,6 +52,7 @@ const defaultData: ParsedData = [
     "Engineering Status": "Pending",
     "Engineering": format(new Date(), "yyyy-MM-dd"),
     "Procurement": "In Progress",
+    "Procurement Date": format(new Date(), "yyyy-MM-dd"),
     "Execution_clearence": "2024-08-15",
     "Execution_start": "2024-08-20",
     "Execution_finish": "2024-08-30",
@@ -228,7 +230,7 @@ export default function Home() {
       );
     }
     
-    const dateColumns = ["engineering", "executionclearence", "executionstart", "executionfinish"];
+    const dateColumns = ["engineering", "procurementdate", "executionclearence", "executionstart", "executionfinish"];
 
     if (dateColumns.includes(normalizedHeader)) {
       const dateValue = isDateString(cellValue) ? new Date(cellValue) : undefined;
