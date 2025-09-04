@@ -27,6 +27,7 @@ const defaultHeaders = [
   'Item',
   'Description',
   'Engineering',
+  'Procurement',
   'Execution_clearence',
   'Execution_start',
   'Execution_finish',
@@ -38,6 +39,7 @@ const defaultData: ParsedData = [
     "Item": "1",
     "Description": "Example Task",
     "Engineering": format(new Date(), "yyyy-MM-dd"),
+    "Procurement": "2024-08-10",
     "Execution_clearence": "2024-08-15",
     "Execution_start": "2024-08-20",
     "Execution_finish": "2024-08-30",
@@ -179,7 +181,7 @@ export default function Home() {
       );
     }
     
-    const dateColumns = ["engineering", "execution_clearence", "execution_start", "execution_finish"];
+    const dateColumns = ["engineering", "procurement", "execution_clearence", "execution_start", "execution_finish"];
     const normalizedHeader = header.toLowerCase().replace(/ /g, '_');
 
     if (dateColumns.includes(normalizedHeader) && isDateString(cellValue)) {
@@ -329,3 +331,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
