@@ -24,7 +24,7 @@ const IntelligentDataParsingInputSchema = z.object({
 export type IntelligentDataParsingInput = z.infer<typeof IntelligentDataParsingInputSchema>;
 
 const IntelligentDataParsingOutputSchema = z.object({
-  parsedData: z.string().describe('The parsed tabular data in JSON format.'),
+  parsedData: z.string().describe('The parsed tabular data in JSON format. The response must be a valid JSON string without any markdown formatting.'),
   parsingNotes: z.string().describe('Notes on the parsing process, including any issues encountered and how they were handled.'),
 });
 export type IntelligentDataParsingOutput = z.infer<typeof IntelligentDataParsingOutputSchema>;
@@ -57,7 +57,7 @@ Here is the file data:
 File Type: {{{fileType}}}
 Delimiter (if applicable): {{{delimiter}}}
 
-Return the parsed data in JSON format, and include notes on the parsing process, including any issues encountered and how they were handled. Be as informative as possible.
+Return the parsed data as a valid JSON string. Do NOT wrap the JSON in markdown code blocks or any other formatting. Your response for the 'parsedData' field must be only the JSON content. Include notes on the parsing process, including any issues encountered and how they were handled. Be as informative as possible.
 
 Ensure that the returned JSON is a valid JSON array of objects representing the tabular data accurately, and that dates are consistently formatted as 'yyyy-MM-dd'. Each object in the array should conform to the target headers.
 `,
