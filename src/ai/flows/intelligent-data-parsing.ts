@@ -60,6 +60,7 @@ Delimiter (if applicable): {{{delimiter}}}
 Return the parsed data as a valid JSON string. Do NOT wrap the JSON in markdown code blocks or any other formatting. Your response for the 'parsedData' field must be only the JSON content. Include notes on the parsing process, including any issues encountered and how they were handled. Be as informative as possible.
 
 Ensure that the returned JSON is a valid JSON array of objects representing the tabular data accurately, and that dates are consistently formatted as 'yyyy-MM-dd'. Each object in the array should conform to the target headers.
+IMPORTANT: The 'parsedData' field must contain ONLY a valid JSON string. It must not contain any markdown, code blocks (like \`\`\`json), or any other text outside of the JSON itself.
 `,
 });
 
