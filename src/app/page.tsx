@@ -13,20 +13,6 @@ import { FileUploader } from "@/components/file-uploader";
 import { useToast } from "@/hooks/use-toast";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 
 type ParsedData = Record<string, any>[];
@@ -67,9 +53,26 @@ export default function Home() {
   const [editingCell, setEditingCell] = useState<{rowIndex: number, header: string} | null>(null);
   const { toast } = useToast();
 
+  const processDataWithSerialNumbers = (data: ParsedData) => {
+    let serialNumber = 1;
+    let currentLocation = '';
+    return data.map((row, index) => {
+      if (index === 0) {
+        currentLocation = row['Location'];
+        serialNumber = 1;
+      } else if (row['Location'] !== currentLocation) {
+        currentLocation = row['Location'];
+        serialNumber = 1;
+      } else {
+        serialNumber++;
+      }
+      return { ...row, 'Item': serialNumber };
+    });
+  };
+  
   const resetState = () => {
     setFile(null);
-    setParsedData(defaultData); // Reset to default data
+    setParsedData(defaultData);
     setError(null);
     setIsLoading(false);
     setEditingCell(null);
@@ -95,10 +98,7 @@ export default function Home() {
           if (result && result.parsedData) {
             try {
               let parsedJson;
-              // Genkit can sometimes return an object directly or a stringified JSON.
-              // We need to handle both cases.
               if (typeof result.parsedData === 'string') {
-                  // Attempt to fix common JSON issues before parsing
                   let cleanJsonString = result.parsedData
                     .replace(/```json/g, '')
                     .replace(/```/g, '')
@@ -109,7 +109,6 @@ export default function Home() {
               }
 
               if (Array.isArray(parsedJson)) {
-                // Ensure all default headers exist in each row
                 const sanitizedData = parsedJson.map(row => {
                   const newRow: Record<string, any> = {};
                   for (const header of defaultHeaders) {
@@ -155,7 +154,6 @@ export default function Home() {
         setParsedData(defaultData);
       };
     } catch (e) {
-      // This outer catch is for synchronous errors before reader starts
       const errorMessage = e instanceof Error ? e.message : "An unknown error occurred preparing the file.";
       setError(errorMessage);
       setIsLoading(false);
@@ -166,7 +164,6 @@ export default function Home() {
   const handleCellChange = (rowIndex: number, header: string, value: any) => {
     if (Array.isArray(parsedData)) {
       const newData = [...parsedData];
-      // Ensure the row object exists
       if (!newData[rowIndex]) newData[rowIndex] = {};
       newData[rowIndex][header] = value;
       setParsedData(newData);
@@ -174,6 +171,13 @@ export default function Home() {
   };
 
   const renderCellContent = (rowIndex: number, header: string, cellValue: any) => {
+    if (header === 'Item') {
+      return (
+        <div className="min-h-[2.5rem] flex items-center">
+          {String(cellValue ?? '')}
+        </div>
+      );
+    }
 
     if (editingCell?.rowIndex === rowIndex && editingCell?.header === header) {
       return (
@@ -225,7 +229,6 @@ export default function Home() {
 
   const renderParsedData = (data: ParsedData) => {
     if (!Array.isArray(data) || data.length === 0) {
-        // Render table with default headers and a message or an empty row
         return (
           <Table>
             <TableHeader>
@@ -259,6 +262,7 @@ export default function Home() {
         )
     }
     const headers = defaultHeaders;
+    const processedData = processDataWithSerialNumbers(data);
     return (
       <>
       <Table>
@@ -283,7 +287,7 @@ export default function Home() {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.map((item, index) => (
+          {processedData.map((item, index) => (
             <TableRow key={index}>
               {headers.map((header) => (
                 <TableCell key={header}>
