@@ -32,7 +32,7 @@ type ParsedData = Record<string, any>[];
 
 const defaultHeaders = [
   'Item',
-  'Description',
+  'Activity',
   'Engineering',
   'Procurement',
   'Execution_clearence',
@@ -44,7 +44,7 @@ const defaultHeaders = [
 const defaultData: ParsedData = [
   {
     "Item": "1",
-    "Description": "Example Task",
+    "Activity": "Example Activity",
     "Engineering": format(new Date(), "yyyy-MM-dd"),
     "Procurement": "In Progress",
     "Execution_clearence": "2024-08-15",

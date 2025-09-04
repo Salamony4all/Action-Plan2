@@ -42,9 +42,9 @@ You will receive a file as a data URI, its file type, and optionally a delimiter
 
 Your goal is to extract the tabular data from the file and return it in JSON format. You should handle incomplete and messy data gracefully, making reasonable assumptions where necessary. The headers in the source file may not exactly match the target headers, but you should use your intelligence to map them correctly.
 
-The target table has the following headers: "Item", "Description", "Engineering", "Procurement", "Execution_clearence", "Execution_start", "Execution_finish", "Status".
+The target table has the following headers: "Item", "Activity", "Engineering", "Procurement", "Execution_clearence", "Execution_start", "Execution_finish", "Status".
 
-Map the data from the source file to these target headers. For example, a column named "Task Name" in the source should be mapped to the "Description" header in the output. A column named "Start Date" should be mapped to "Execution_start".
+Map the data from the source file to these target headers. For example, a column named "Task Name" in the source should be mapped to the "Activity" header in the output. A column named "Start Date" should be mapped to "Execution_start".
 
 When you identify a date in the source data, you MUST format it as 'yyyy-MM-dd'. Do not use any other date format.
 
