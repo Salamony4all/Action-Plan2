@@ -307,13 +307,13 @@ export default function Home() {
                 <TableHead rowSpan={2} className="w-[50px]"></TableHead>
               </TableRow>
               <TableRow>
-                <TableHead className="border-l">Engineering Status</TableHead>
-                <TableHead className="border-r">Engineering</TableHead>
-                <TableHead>Procurement</TableHead>
-                <TableHead className="border-r">Procurement Date</TableHead>
-                <TableHead>Execution Clearence</TableHead>
-                <TableHead>Execution Start</TableHead>
-                <TableHead className="border-r">Execution Finish</TableHead>
+                <TableHead className="border-l">Status</TableHead>
+                <TableHead className="border-r">Date</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="border-r">Date</TableHead>
+                <TableHead>Clearence</TableHead>
+                <TableHead>Start</TableHead>
+                <TableHead className="border-r">Finish</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -342,13 +342,13 @@ export default function Home() {
             <TableHead rowSpan={2} className="w-[50px]"></TableHead>
           </TableRow>
           <TableRow>
-            <TableHead className="border-l">Engineering Status</TableHead>
-            <TableHead className="border-r">Engineering</TableHead>
-            <TableHead>Procurement</TableHead>
-            <TableHead className="border-r">Procurement Date</TableHead>
-            <TableHead>Execution Clearence</TableHead>
-            <TableHead>Execution Start</TableHead>
-            <TableHead className="border-r">Execution Finish</TableHead>
+            <TableHead className="border-l">Status</TableHead>
+            <TableHead className="border-r">Date</TableHead>
+            <TableHead>Status</TableHead>
+            <TableHead className="border-r">Date</TableHead>
+            <TableHead>Clearence</TableHead>
+            <TableHead>Start</TableHead>
+            <TableHead className="border-r">Finish</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
