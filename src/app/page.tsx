@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -161,14 +162,6 @@ export default function Home() {
       setParsedData(defaultData);
     }
   };
-
-  const handleDateChange = (rowIndex: number, header: string, date: Date | undefined) => {
-    if (Array.isArray(parsedData) && date) {
-      const newData = [...parsedData];
-      newData[rowIndex][header] = format(date, "yyyy-MM-dd");
-      setParsedData(newData);
-    }
-  };
   
   const handleCellChange = (rowIndex: number, header: string, value: any) => {
     if (Array.isArray(parsedData)) {
@@ -180,16 +173,7 @@ export default function Home() {
     }
   };
 
-  const isDateString = (s: any): s is string => {
-    if (typeof s !== 'string' || s.trim() === '' || s.toLowerCase() === 'n/a') return false;
-    // Attempt to parse the string as a date
-    const d = new Date(s);
-    // Check if the parsed date is valid and not NaN
-    return d instanceof Date && !isNaN(d.getTime());
-  };
-
   const renderCellContent = (rowIndex: number, header: string, cellValue: any) => {
-    const normalizedHeader = header.toLowerCase().replace(/_/g, ' ').replace(/ /g, '');
 
     if (editingCell?.rowIndex === rowIndex && editingCell?.header === header) {
       return (
@@ -213,79 +197,6 @@ export default function Home() {
         />
       );
     }
-    
-    if (normalizedHeader === 'engineeringstatus') {
-      const statuses = ["Completed", "In Progress", "Delayed", "Pending"];
-      return (
-        <Select
-          value={cellValue}
-          onValueChange={(value) => handleCellChange(rowIndex, header, value)}
-        >
-          <SelectTrigger className="w-full min-w-[150px]">
-            <SelectValue placeholder="Select status" />
-          </SelectTrigger>
-          <SelectContent>
-            {statuses.map(status => (
-              <SelectItem key={status} value={status}>{status}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      );
-    }
-
-    if (normalizedHeader === 'procurement') {
-      const statuses = ["Completed", "In Progress", "Delayed", "Pending"];
-      return (
-        <Select
-          value={cellValue}
-          onValueChange={(value) => handleCellChange(rowIndex, header, value)}
-        >
-          <SelectTrigger className="w-full min-w-[150px]">
-            <SelectValue placeholder="Select status" />
-          </SelectTrigger>
-          <SelectContent>
-            {statuses.map(status => (
-              <SelectItem key={status} value={status}>{status}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      );
-    }
-    
-    const dateColumns = ["engineering", "procurementdate", "executionclearence", "executionstart", "executionfinish"];
-
-    if (dateColumns.includes(normalizedHeader)) {
-      const dateValue = isDateString(cellValue) ? new Date(cellValue) : undefined;
-      return (
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button
-              variant={"outline"}
-              className={cn(
-                "w-full min-w-[150px] justify-start text-left font-normal",
-                !dateValue && "text-muted-foreground"
-              )}
-            >
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {dateValue ? format(dateValue, "PPP") : <span>Pick a date</span>}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0">
-            <Calendar
-              mode="single"
-              selected={dateValue}
-              onSelect={(date) => {
-                handleDateChange(rowIndex, header, date)
-                const popoverTrigger = document.querySelector(`[data-radix-popover-trigger][aria-expanded="true"]`) as HTMLElement | null;
-                popoverTrigger?.click();
-              }}
-              initialFocus
-            />
-          </PopoverContent>
-        </Popover>
-      );
-    }
-
 
     return (
       <div onClick={() => setEditingCell({rowIndex, header})} className="min-h-[2.5rem] flex items-center">
@@ -437,7 +348,7 @@ export default function Home() {
           <Card className="shadow-md">
             <CardHeader>
               <CardTitle className="text-xl">Extracted Data</CardTitle>
-              <CardDescription>Click any cell to edit its content. Dates will have a calendar picker.</CardDescription>
+              <CardDescription>Click any cell to edit its content.</CardDescription>
             </CardHeader>
             <CardContent className="text-sm">
               {renderParsedData(parsedData)}
