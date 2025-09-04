@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -42,7 +43,7 @@ You will receive a file as a data URI, its file type, and optionally a delimiter
 
 Your goal is to extract the tabular data from the file and return it in JSON format. You should handle incomplete and messy data gracefully, making reasonable assumptions where necessary. The headers in the source file may not exactly match the target headers, but you should use your intelligence to map them correctly.
 
-The target table has the following headers: "Item", "Zone", "Location", "Activity", "Engineering Status", "Engineering", "Procurement", "Procurement Date", "Execution_clearence", "Execution_start", "Execution_finish".
+The target table has the following headers: "SN", "Zone", "Location", "Activity", "Engineering Status", "Engineering", "Procurement", "Procurement Date", "Execution_clearence", "Execution_start", "Execution_finish".
 
 Map the data from the source file to these target headers. For example, a column named "Task Name" in the source should be mapped to the "Activity" header in the output. A column named "Start Date" should be mapped to "Execution_start".
 

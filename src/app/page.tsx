@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 type ParsedData = Record<string, any>[];
 
 const defaultHeaders = [
-  'Item',
+  'SN',
   'Zone',
   'Location',
   'Activity',
@@ -33,7 +33,7 @@ const defaultHeaders = [
 
 const defaultData: ParsedData = [
   {
-    "Item": "1",
+    "SN": "1",
     "Zone": "Example Zone",
     "Location": "Example Location",
     "Activity": "Example Activity",
@@ -68,7 +68,7 @@ export default function Home() {
       } else {
         serialNumber++;
       }
-      return { ...row, 'Item': serialNumber };
+      return { ...row, 'SN': serialNumber };
     });
   };
   
@@ -173,7 +173,7 @@ export default function Home() {
   };
 
   const renderCellContent = (rowIndex: number, header: string, cellValue: any) => {
-    if (header === 'Item') {
+    if (header === 'SN') {
       return (
         <div className="min-h-[2.5rem] flex items-center">
           {String(cellValue ?? '')}
@@ -235,7 +235,7 @@ export default function Home() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead rowSpan={2} className="text-center">Item</TableHead>
+                <TableHead rowSpan={2} className="text-center">SN</TableHead>
                 <TableHead rowSpan={2} className="text-center">Zone</TableHead>
                 <TableHead rowSpan={2} className="text-center">Location</TableHead>
                 <TableHead rowSpan={2} className="text-center">Activity</TableHead>
@@ -271,7 +271,7 @@ export default function Home() {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead rowSpan={2} className="text-center">Item</TableHead>
+            <TableHead rowSpan={2} className="text-center">SN</TableHead>
             <TableHead rowSpan={2} className="text-center">Zone</TableHead>
             <TableHead rowSpan={2} className="text-center">Location</TableHead>
             <TableHead rowSpan={2} className="text-center">Activity</TableHead>
