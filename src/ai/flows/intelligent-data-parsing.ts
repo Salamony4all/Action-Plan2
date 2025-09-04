@@ -40,7 +40,11 @@ const prompt = ai.definePrompt({
 
 You will receive a file as a data URI, its file type, and optionally a delimiter.
 
-Your goal is to extract the tabular data from the file and return it in JSON format. You should handle incomplete and messy data gracefully, making reasonable assumptions where necessary.
+Your goal is to extract the tabular data from the file and return it in JSON format. You should handle incomplete and messy data gracefully, making reasonable assumptions where necessary. The headers in the source file may not exactly match the target headers, but you should use your intelligence to map them correctly.
+
+The target table has the following headers: "Item", "Description", "Engineering", "Procurement", "Execution_clearence", "Execution_start", "Execution_finish", "Status".
+
+Map the data from the source file to these target headers. For example, a column named "Task Name" in the source should be mapped to the "Description" header in the output. A column named "Start Date" should be mapped to "Execution_start".
 
 When you identify a date in the source data, you MUST format it as 'yyyy-MM-dd'. Do not use any other date format.
 
@@ -54,7 +58,7 @@ Delimiter (if applicable): {{{delimiter}}}
 
 Return the parsed data in JSON format, and include notes on the parsing process, including any issues encountered and how they were handled. Be as informative as possible.
 
-Ensure that the returned JSON is a valid JSON array of objects representing the tabular data accurately, and that dates are consistently formatted as 'yyyy-MM-dd'.
+Ensure that the returned JSON is a valid JSON array of objects representing the tabular data accurately, and that dates are consistently formatted as 'yyyy-MM-dd'. Each object in the array should conform to the target headers.
 `,
 });
 
