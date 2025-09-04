@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Loader2, FileWarning, Calendar as CalendarIcon, FileText, Check, Plus, Trash2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Loader2, FileWarning, Calendar as CalendarIcon, FileText, Plus, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { intelligentDataParsing, type IntelligentDataParsingOutput } from "@/ai/flows/intelligent-data-parsing";
 
@@ -21,12 +21,33 @@ import {
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 
+type ParsedData = Record<string, any>[];
 
-type ParsedData = Record<string, any>[] | Record<string, any>;
+const defaultHeaders = [
+  'Item',
+  'Description',
+  'Engineering',
+  'Execution_clearence',
+  'Execution_start',
+  'Execution_finish',
+  'Status'
+];
+
+const defaultData: ParsedData = [
+  {
+    "Item": "1",
+    "Description": "Example Task",
+    "Engineering": format(new Date(), "yyyy-MM-dd"),
+    "Execution_clearence": "2024-08-15",
+    "Execution_start": "2024-08-20",
+    "Execution_finish": "2024-08-30",
+    "Status": "Not Started"
+  }
+];
 
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
-  const [parsedData, setParsedData] = useState<ParsedData | null>(null);
+  const [parsedData, setParsedData] = useState<ParsedData>(defaultData);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [editingCell, setEditingCell] = useState<{rowIndex: number, header: string} | null>(null);
@@ -34,16 +55,16 @@ export default function Home() {
 
   const resetState = () => {
     setFile(null);
-    setParsedData(null);
+    setParsedData(defaultData); // Reset to default data
     setError(null);
     setIsLoading(false);
     setEditingCell(null);
   };
 
   const handleFileSelect = async (selectedFile: File) => {
-    resetState();
     setFile(selectedFile);
     setIsLoading(true);
+    setError(null);
 
     try {
       const reader = new FileReader();
@@ -60,7 +81,14 @@ export default function Home() {
           if (result.parsedData) {
             try {
               const parsedJson = JSON.parse(result.parsedData);
-              setParsedData(parsedJson);
+              if (Array.isArray(parsedJson)) {
+                setParsedData(parsedJson);
+              } else {
+                // If the parsed data is not an array, we can't display it in the table.
+                // We'll show an error.
+                setError("Parsed data is not in a valid table format (array of objects).");
+                setParsedData(defaultData);
+              }
               toast({
                 title: "Success",
                 description: "Data parsed successfully.",
@@ -68,13 +96,16 @@ export default function Home() {
               });
             } catch (e) {
               setError("Failed to parse the data from AI. The format might be incorrect.");
+              setParsedData(defaultData);
             }
           } else {
             setError("The AI could not parse any data from the file.");
+            setParsedData(defaultData);
           }
         } catch (e) {
           const errorMessage = e instanceof Error ? e.message : "An unknown error occurred during parsing.";
           setError(errorMessage);
+          setParsedData(defaultData);
           toast({
             title: "Error",
             description: errorMessage,
@@ -87,12 +118,14 @@ export default function Home() {
       reader.onerror = () => {
         setError("Failed to read the file.");
         setIsLoading(false);
+        setParsedData(defaultData);
       };
     } catch (e) {
       // This outer catch is for synchronous errors before reader starts
       const errorMessage = e instanceof Error ? e.message : "An unknown error occurred preparing the file.";
       setError(errorMessage);
       setIsLoading(false);
+      setParsedData(defaultData);
     }
   };
 
@@ -107,6 +140,8 @@ export default function Home() {
   const handleCellChange = (rowIndex: number, header: string, value: any) => {
     if (Array.isArray(parsedData)) {
       const newData = [...parsedData];
+      // Ensure the row object exists
+      if (!newData[rowIndex]) newData[rowIndex] = {};
       newData[rowIndex][header] = value;
       setParsedData(newData);
     }
@@ -125,7 +160,7 @@ export default function Home() {
       return (
         <Input
           type="text"
-          defaultValue={String(cellValue)}
+          defaultValue={String(cellValue ?? '')}
           onBlur={(e) => {
             handleCellChange(rowIndex, header, e.target.value);
             setEditingCell(null);
@@ -178,16 +213,15 @@ export default function Home() {
 
     return (
       <div onClick={() => setEditingCell({rowIndex, header})} className="min-h-[2.5rem] flex items-center">
-        {String(cellValue)}
+        {String(cellValue ?? '')}
       </div>
     );
   };
 
 
   const addRow = () => {
-    if (Array.isArray(parsedData) && parsedData.length > 0) {
-      const headers = Object.keys(parsedData[0]);
-      const newRow = headers.reduce((acc, header) => {
+    if (Array.isArray(parsedData)) {
+      const newRow = defaultHeaders.reduce((acc, header) => {
         acc[header] = '';
         return acc;
       }, {} as Record<string, any>);
@@ -203,58 +237,41 @@ export default function Home() {
   };
 
   const renderParsedData = (data: ParsedData) => {
-    if (Array.isArray(data) && data.length > 0) {
-      const headers = Object.keys(data[0]);
-      return (
-        <>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              {headers.map((header) => (
-                <TableHead key={header} className="capitalize">{header.replace(/_/g, ' ')}</TableHead>
-              ))}
-              <TableHead className="w-[50px]"></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {data.map((item, index) => (
-              <TableRow key={index}>
-                {headers.map((header) => (
-                  <TableCell key={header}>
-                    {renderCellContent(index, header, item[header])}
-                  </TableCell>
-                ))}
-                <TableCell>
-                  <Button variant="ghost" size="icon" onClick={() => removeRow(index)}>
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                </TableCell>
-              </TableRow>
+    const headers = defaultHeaders;
+    return (
+      <>
+      <Table>
+        <TableHeader>
+          <TableRow>
+            {headers.map((header) => (
+              <TableHead key={header} className="capitalize">{header.replace(/_/g, ' ')}</TableHead>
             ))}
-          </TableBody>
-        </Table>
-        <div className="mt-4">
-          <Button onClick={addRow}><Plus className="mr-2"/> Add Row</Button>
-        </div>
-        </>
-      );
-    }
-    if (!Array.isArray(data) && data) {
-        return (
-            <div className="space-y-2">
-                {Object.entries(data).map(([key, value]) => (
-                    <div key={key} className="grid grid-cols-3 gap-4 items-start">
-                        <span className="font-semibold capitalize text-muted-foreground">{key.replace(/_/g, ' ')}</span>
-                        <span className="col-span-2 text-foreground">{String(value)}</span>
-                    </div>
-                ))}
-            </div>
-        );
-    }
-
-    return <p>No data to display.</p>;
+            <TableHead className="w-[50px]"></TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {data.map((item, index) => (
+            <TableRow key={index}>
+              {headers.map((header) => (
+                <TableCell key={header}>
+                  {renderCellContent(index, header, item[header])}
+                </TableCell>
+              ))}
+              <TableCell>
+                <Button variant="ghost" size="icon" onClick={() => removeRow(index)}>
+                  <Trash2 className="h-4 w-4 text-destructive" />
+                </Button>
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+      <div className="mt-4">
+        <Button onClick={addRow}><Plus className="mr-2"/> Add Row</Button>
+      </div>
+      </>
+    );
   };
-
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground font-body">
@@ -265,20 +282,20 @@ export default function Home() {
         </div>
       </header>
       <main className="flex-1 container mx-auto p-4 md:p-8">
-        <div className="max-w-5xl mx-auto grid gap-8">
+        <div className="grid gap-8">
             <Card className="shadow-md">
               <CardHeader>
                 <CardTitle className="text-xl flex items-center gap-2">
                   <FileText className="w-5 h-5" /> Upload File
                 </CardTitle>
-                <CardDescription>Upload a file to automatically extract data.</CardDescription>
+                <CardDescription>Upload a file to automatically extract and structure data into the table below.</CardDescription>
               </CardHeader>
               <CardContent>
-                <FileUploader onFileSelect={handleFileSelect} onFileRemove={resetState} selectedFile={file} acceptedFileTypes=".csv,.txt,.json,application/pdf,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+                <FileUploader onFileSelect={handleFileSelect} onFileRemove={resetState} selectedFile={file} />
               </CardContent>
             </Card>
-
-          {isLoading && !parsedData && (
+          
+          {isLoading && (
             <div className="flex items-center justify-center gap-3 text-lg font-medium text-primary">
               <Loader2 className="w-8 h-8 animate-spin" />
               <span>Parsing your data...</span>
@@ -295,17 +312,15 @@ export default function Home() {
             </Alert>
           )}
 
-          {parsedData && (
-            <Card className="shadow-md">
-              <CardHeader>
-                <CardTitle className="text-xl">Extracted Data</CardTitle>
-                <CardDescription>Click any cell to edit its content. Dates will have a calendar picker.</CardDescription>
-              </CardHeader>
-              <CardContent className="text-sm">
-                {renderParsedData(parsedData)}
-              </CardContent>
-            </Card>
-          )}
+          <Card className="shadow-md">
+            <CardHeader>
+              <CardTitle className="text-xl">Extracted Data</CardTitle>
+              <CardDescription>Click any cell to edit its content. Dates will have a calendar picker.</CardDescription>
+            </CardHeader>
+            <CardContent className="text-sm">
+              {renderParsedData(parsedData)}
+            </CardContent>
+          </Card>
         </div>
       </main>
       <footer className="py-4 text-center text-sm text-muted-foreground border-t">
@@ -314,5 +329,3 @@ export default function Home() {
     </div>
   );
 }
-
-    
