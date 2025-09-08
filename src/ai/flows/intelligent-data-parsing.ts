@@ -41,7 +41,9 @@ const prompt = ai.definePrompt({
 
 You will receive a file as a data URI, its file type, and optionally a delimiter.
 
-Your goal is to extract the tabular data from the file and return it in JSON format. You should handle incomplete and messy data gracefully, making reasonable assumptions where necessary. The headers in the source file may not exactly match the target headers, but you should use your intelligence to map them correctly.
+Your goal is to extract the tabular data from the file and return it in JSON format. You must process the entire document, including all pages, to ensure all data is extracted.
+
+You should handle incomplete and messy data gracefully, making reasonable assumptions where necessary. The headers in the source file may not exactly match the target headers, but you should use your intelligence to map them correctly.
 
 The target table has the following headers: "SN", "Location", "Activity", "Engineering Status", "Engineering", "Procurement", "Procurement Date", "Execution_clearence", "Execution_start", "Execution_finish".
 
