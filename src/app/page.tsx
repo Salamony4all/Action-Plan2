@@ -80,6 +80,38 @@ export default function Home() {
     setEditingCell(null);
   };
 
+  const cleanAndParseJson = (input: string | object): any => {
+    if (typeof input === 'object') {
+      return input; // It's already an object
+    }
+
+    if (typeof input !== 'string') {
+      throw new Error("Invalid input type for JSON parsing.");
+    }
+    
+    // Attempt to find a JSON object or array within the string
+    const jsonRegex = /```json\s*([\s\S]*?)\s*```|(\[[\s\S]*\]|\{[\s\S]*\})/im;
+    const match = input.match(jsonRegex);
+
+    if (!match) {
+      throw new Error("No valid JSON found in the response.");
+    }
+
+    // Extract the JSON part from the regex match
+    const cleanJsonString = match[1] || match[2];
+
+    if (!cleanJsonString) {
+      throw new Error("Could not extract JSON from the response.");
+    }
+
+    try {
+      return JSON.parse(cleanJsonString);
+    } catch (e) {
+      console.error("Final JSON parsing attempt failed:", e);
+      throw new Error("Failed to parse the extracted JSON data.");
+    }
+  };
+
   const handleFileSelect = async (selectedFile: File) => {
     setFile(selectedFile);
     setIsLoading(true);
@@ -99,24 +131,7 @@ export default function Home() {
           
           if (result && result.parsedData) {
             try {
-              let parsedJson;
-              if (typeof result.parsedData === 'string') {
-                  const jsonRegex = /```json\s*([\s\S]*?)\s*```|(\[[\s\S]*\]|\{[\s\S]*\})/m;
-                  const match = result.parsedData.match(jsonRegex);
-                  
-                  if (match) {
-                    const cleanJsonString = match[1] || match[2];
-                    if (cleanJsonString) {
-                      parsedJson = JSON.parse(cleanJsonString);
-                    } else {
-                      throw new Error("Could not extract JSON from the response.");
-                    }
-                  } else {
-                     throw new Error("No valid JSON found in the response.");
-                  }
-              } else {
-                  parsedJson = result.parsedData;
-              }
+              const parsedJson = cleanAndParseJson(result.parsedData);
 
               if (Array.isArray(parsedJson)) {
                 setParsedData(parsedJson);
@@ -131,7 +146,8 @@ export default function Home() {
               });
             } catch (e) {
               console.error("JSON Parsing Error:", e, "Raw Data:", result.parsedData);
-              setError("Failed to parse the data from AI. The format might be incorrect.");
+              const errorMessage = e instanceof Error ? e.message : "An unknown error occurred during parsing.";
+              setError(`Failed to parse the data from AI. ${errorMessage}`);
               setParsedData(defaultData);
             }
           } else {
