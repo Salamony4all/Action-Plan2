@@ -20,19 +20,6 @@ import { Input } from "@/components/ui/input";
 
 type ParsedData = Record<string, any>[];
 
-const defaultHeaders = [
-  'SN',
-  'Location',
-  'Activity',
-  'Engineering Status',
-  'Engineering',
-  'Procurement',
-  'Procurement Date',
-  'Execution_clearence',
-  'Execution_start',
-  'Execution_finish'
-];
-
 const defaultData: ParsedData = [
   {
     "SN": "1",
@@ -56,20 +43,32 @@ export default function Home() {
   const [editingCell, setEditingCell] = useState<{rowIndex: number, header: string} | null>(null);
   const { toast } = useToast();
 
-  const processDataWithSerialNumbers = (data: ParsedData) => {
-    let serialNumber = 1;
-    let currentLocation = '';
-    return data.map((row, index) => {
-      if (index === 0) {
-        currentLocation = row['Location'];
-        serialNumber = 1;
-      } else if (row['Location'] !== currentLocation) {
-        currentLocation = row['Location'];
-        serialNumber = 1;
-      } else {
-        serialNumber++;
+  const getHeaders = (data: ParsedData) => {
+    if (!Array.isArray(data) || data.length === 0) {
+      return Object.keys(defaultData[0]);
+    }
+    const headers = new Set<string>();
+    data.forEach(row => {
+      if (row && typeof row === 'object' && !row.zone) {
+        Object.keys(row).forEach(key => headers.add(key));
       }
-      return { ...row, 'SN': serialNumber };
+    });
+    return Array.from(headers);
+  }
+
+  const processDataWithSerialNumbers = (data: ParsedData) => {
+    let serialNumber = 0;
+    return data.map((row) => {
+      if (row.zone) {
+        serialNumber = 0; // Reset counter for new zone
+        return row;
+      }
+      serialNumber++;
+      const firstKey = Object.keys(row)[0];
+      if (firstKey) {
+        return { ...row, [firstKey]: serialNumber };
+      }
+      return { ...row };
     });
   };
   
@@ -120,14 +119,7 @@ export default function Home() {
               }
 
               if (Array.isArray(parsedJson)) {
-                const sanitizedData = parsedJson.map(row => {
-                  const newRow: Record<string, any> = {};
-                  for (const header of defaultHeaders) {
-                    newRow[header] = row[header] ?? '';
-                  }
-                  return newRow;
-                });
-                setParsedData(sanitizedData);
+                setParsedData(parsedJson);
               } else {
                 setError("Parsed data is not in a valid table format (array of objects).");
                 setParsedData(defaultData);
@@ -175,32 +167,29 @@ export default function Home() {
   const handleCellChange = (rowIndex: number, header: string, value: any) => {
     if (Array.isArray(parsedData)) {
       const newData = [...parsedData];
-      if (!newData[rowIndex]) newData[rowIndex] = {};
-      newData[rowIndex][header] = value;
+      const row = newData[rowIndex];
+      if (row.zone) {
+        row.zone = value;
+      } else {
+         if (!row) newData[rowIndex] = {};
+         row[header] = value;
+      }
       setParsedData(newData);
     }
   };
 
   const exportToPDF = () => {
     const doc = new jsPDF();
-    const processedData = processDataWithSerialNumbers(parsedData);
-    
-    const head = [['SN', 'Location', 'Activity', 'Engineering Status', 'Engineering Date', 'Procurement Status', 'Procurement Date', 'Execution Clearence', 'Execution Start', 'Execution Finish']];
-    const body = processedData.map(row => [
-        row['SN'],
-        row['Location'],
-        row['Activity'],
-        row['Engineering Status'],
-        row['Engineering'],
-        row['Procurement'],
-        row['Procurement Date'],
-        row['Execution_clearence'],
-        row['Execution_start'],
-        row['Execution_finish'],
-    ]);
+    const headers = getHeaders(parsedData);
+    const body = parsedData.map(row => {
+      if (row.zone) {
+        return [{ content: row.zone, colSpan: headers.length, styles: { fontStyle: 'bold', fillColor: [230, 230, 230] } }];
+      }
+      return headers.map(header => row[header] ?? '');
+    });
 
     autoTable(doc, {
-        head: head,
+        head: [headers],
         body: body,
         didDrawPage: (data) => {
             doc.setFontSize(18);
@@ -213,34 +202,34 @@ export default function Home() {
   };
 
   const exportToExcel = () => {
-    const processedData = processDataWithSerialNumbers(parsedData);
+    const processedData = parsedData.map(row => {
+      if(row.zone){
+        return { Zone: row.zone };
+      }
+      return row;
+    })
     const worksheet = XLSX.utils.json_to_sheet(processedData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
     XLSX.writeFile(workbook, "ncsi-action-plan.xlsx");
   };
 
-  const renderCellContent = (rowIndex: number, header: string, cellValue: any) => {
-    if (header === 'SN') {
-      return (
-        <div className="min-h-[2.5rem] flex items-center">
-          {String(cellValue ?? '')}
-        </div>
-      );
-    }
-
-    if (editingCell?.rowIndex === rowIndex && editingCell?.header === header) {
+  const renderCellContent = (rowIndex: number, header: string | null, cellValue: any) => {
+    const isZoneRow = typeof cellValue === 'object' && cellValue.zone;
+    const currentHeader = header || (isZoneRow ? 'zone' : '');
+    
+    if (editingCell?.rowIndex === rowIndex && editingCell?.header === currentHeader) {
       return (
         <Input
           type="text"
-          defaultValue={String(cellValue ?? '')}
+          defaultValue={String(isZoneRow ? cellValue.zone : cellValue ?? '')}
           onBlur={(e) => {
-            handleCellChange(rowIndex, header, e.target.value);
+            handleCellChange(rowIndex, currentHeader, e.target.value);
             setEditingCell(null);
           }}
           onKeyDown={(e) => {
             if (e.key === 'Enter') {
-              handleCellChange(rowIndex, header, e.currentTarget.value);
+              handleCellChange(rowIndex, currentHeader, e.currentTarget.value);
               setEditingCell(null);
             } else if (e.key === 'Escape') {
               setEditingCell(null);
@@ -252,21 +241,26 @@ export default function Home() {
       );
     }
 
+    const valueToDisplay = isZoneRow ? cellValue.zone : String(cellValue ?? '');
     return (
-      <div onClick={() => setEditingCell({rowIndex, header})} className="min-h-[2.5rem] flex items-center">
-        {String(cellValue ?? '')}
+      <div onClick={() => setEditingCell({rowIndex, header: currentHeader})} className="min-h-[2.5rem] flex items-center">
+        {valueToDisplay}
       </div>
     );
   };
 
 
-  const addRow = () => {
+  const addRow = (rowIndex: number) => {
     if (Array.isArray(parsedData)) {
-      const newRow = defaultHeaders.reduce((acc, header) => {
+      const headers = getHeaders(parsedData);
+      const newRow = headers.reduce((acc, header) => {
         acc[header] = '';
         return acc;
       }, {} as Record<string, any>);
-      setParsedData([...parsedData, newRow]);
+      
+      const newData = [...parsedData];
+      newData.splice(rowIndex + 1, 0, newRow);
+      setParsedData(newData);
     }
   };
 
@@ -278,83 +272,66 @@ export default function Home() {
   };
 
   const renderParsedData = (data: ParsedData) => {
-    if (!Array.isArray(data) || data.length === 0) {
+    const headers = getHeaders(data);
+    if (!Array.isArray(data) || data.length === 0 || headers.length === 0) {
         return (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead rowSpan={2} className="text-center">SN</TableHead>
-                <TableHead rowSpan={2} className="text-center">Location</TableHead>
-                <TableHead rowSpan={2} className="text-center">Activity</TableHead>
-                <TableHead colSpan={2} className="text-center border-l border-r">Engineering</TableHead>
-                <TableHead colSpan={2} className="text-center border-r">Procurement</TableHead>
-                <TableHead colSpan={3} className="text-center border-r">Execution</TableHead>
-                <TableHead rowSpan={2} className="w-[50px]"></TableHead>
-              </TableRow>
-              <TableRow>
-                <TableHead className="text-center border-l">Status</TableHead>
-                <TableHead className="text-center border-r">Date</TableHead>
-                <TableHead className="text-center">Status</TableHead>
-                <TableHead className="text-center border-r">Date</TableHead>
-                <TableHead className="text-center">Clearence</TableHead>
-                <TableHead className="text-center">Start</TableHead>
-                <TableHead className="text-center border-r">Finish</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-                <TableRow>
-                    <TableCell colSpan={defaultHeaders.length + 1} className="text-center">
-                        No data to display. Upload a file to get started.
-                    </TableCell>
-                </TableRow>
-            </TableBody>
-          </Table>
+          <div className="text-center p-4">
+              No data to display. Upload a file to get started.
+          </div>
         )
     }
-    const headers = defaultHeaders;
+    
     const processedData = processDataWithSerialNumbers(data);
+
     return (
       <>
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead rowSpan={2} className="text-center">SN</TableHead>
-            <TableHead rowSpan={2} className="text-center">Location</TableHead>
-            <TableHead rowSpan={2} className="text-center">Activity</TableHead>
-            <TableHead colSpan={2} className="text-center border-l border-r">Engineering</TableHead>
-            <TableHead colSpan={2} className="text-center border-r">Procurement</TableHead>
-            <TableHead colSpan={3} className="text-center border-r">Execution</TableHead>
-            <TableHead rowSpan={2} className="w-[50px]"></TableHead>
-          </TableRow>
-          <TableRow>
-            <TableHead className="text-center border-l">Status</TableHead>
-            <TableHead className="text-center border-r">Date</TableHead>
-            <TableHead className="text-center">Status</TableHead>
-            <TableHead className="text-center border-r">Date</TableHead>
-            <TableHead className="text-center">Clearence</TableHead>
-            <TableHead className="text-center">Start</TableHead>
-            <TableHead className="text-center border-r">Finish</TableHead>
+            {headers.map((header) => (
+              <TableHead key={header} className="text-center">{header}</TableHead>
+            ))}
+            <TableHead className="w-[100px]"></TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {processedData.map((item, index) => (
-            <TableRow key={index}>
-              {headers.map((header) => (
-                <TableCell key={header}>
-                  {renderCellContent(index, header, item[header])}
+            item.zone ? (
+              <TableRow key={index}>
+                <TableCell colSpan={headers.length} className="font-bold bg-muted/50">
+                  {renderCellContent(index, null, item)}
                 </TableCell>
-              ))}
-              <TableCell>
-                <Button variant="ghost" size="icon" onClick={() => removeRow(index)}>
-                  <Trash2 className="h-4 w-4 text-destructive" />
-                </Button>
-              </TableCell>
-            </TableRow>
+                <TableCell>
+                  <Button variant="ghost" size="icon" onClick={() => removeRow(index)}>
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => addRow(index)}>
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            ) : (
+              <TableRow key={index}>
+                {headers.map((header) => (
+                  <TableCell key={header}>
+                    {renderCellContent(index, header, item[header])}
+                  </TableCell>
+                ))}
+                <TableCell>
+                  <Button variant="ghost" size="icon" onClick={() => removeRow(index)}>
+                    <Trash2 className="h-4 w-4 text-destructive" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={() => addRow(index)}>
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </TableCell>
+              </TableRow>
+            )
           ))}
         </TableBody>
       </Table>
       <div className="mt-4">
-        <Button onClick={addRow}><Plus className="mr-2"/> Add Row</Button>
+        <Button onClick={() => addRow(parsedData.length -1)}><Plus className="mr-2"/> Add Row at End</Button>
       </div>
       </>
     );
@@ -433,5 +410,3 @@ export default function Home() {
     </div>
   );
 }
-
-    
