@@ -215,7 +215,7 @@ export default function Home() {
   };
 
   const renderCellContent = (rowIndex: number, header: string | null, cellValue: any) => {
-    const isZoneRow = typeof cellValue === 'object' && cellValue.zone;
+    const isZoneRow = typeof cellValue === 'object' && cellValue !== null && cellValue.zone;
     const currentHeader = header || (isZoneRow ? 'zone' : '');
     
     if (editingCell?.rowIndex === rowIndex && editingCell?.header === currentHeader) {
