@@ -42,10 +42,12 @@ export function ExportDataCard({ data, defaultData }: ExportDataCardProps) {
         head: [headers],
         body: body,
         didDrawPage: (data) => {
+            // Header
             doc.setFontSize(18);
             doc.setTextColor(40);
             doc.text("NCSI Action Plan", data.settings.margin.left, 15);
         },
+        margin: { top: 25 },
     });
 
     doc.save('ncsi-action-plan.pdf');
