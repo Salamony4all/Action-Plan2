@@ -1,12 +1,15 @@
 
 "use client";
 
-import { useState, useEffect } from "react";
-import { Loader2, FileWarning, Calendar as CalendarIcon, FileText, Plus, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { Loader2, FileWarning, FileText, Plus, Trash2, Download } from "lucide-react";
 import { format } from "date-fns";
 import { intelligentDataParsing, type IntelligentDataParsingOutput } from "@/ai/flows/intelligent-data-parsing";
+import jsPDF from "jspdf";
+import autoTable from 'jspdf-autotable';
+import * as XLSX from 'xlsx';
 
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Logo } from "@/components/icons";
 import { FileUploader } from "@/components/file-uploader";
@@ -99,14 +102,10 @@ export default function Home() {
             try {
               let parsedJson;
               if (typeof result.parsedData === 'string') {
-                  // This regex is designed to find a JSON array or object within a string,
-                  // even if it's embedded in markdown code blocks or other text.
                   const jsonRegex = /```json\s*([\s\S]*?)\s*```|(\[[\s\S]*\]|\{[\s\S]*\})/m;
                   const match = result.parsedData.match(jsonRegex);
                   
                   if (match) {
-                    // It will prioritize the content of a ```json block if present,
-                    // otherwise it will take the first standalone array or object.
                     const cleanJsonString = match[1] || match[2];
                     if (cleanJsonString) {
                       parsedJson = JSON.parse(cleanJsonString);
@@ -180,6 +179,45 @@ export default function Home() {
       newData[rowIndex][header] = value;
       setParsedData(newData);
     }
+  };
+
+  const exportToPDF = () => {
+    const doc = new jsPDF();
+    const processedData = processDataWithSerialNumbers(parsedData);
+    
+    const head = [['SN', 'Location', 'Activity', 'Engineering Status', 'Engineering Date', 'Procurement Status', 'Procurement Date', 'Execution Clearence', 'Execution Start', 'Execution Finish']];
+    const body = processedData.map(row => [
+        row['SN'],
+        row['Location'],
+        row['Activity'],
+        row['Engineering Status'],
+        row['Engineering'],
+        row['Procurement'],
+        row['Procurement Date'],
+        row['Execution_clearence'],
+        row['Execution_start'],
+        row['Execution_finish'],
+    ]);
+
+    autoTable(doc, {
+        head: head,
+        body: body,
+        didDrawPage: (data) => {
+            doc.setFontSize(18);
+            doc.setTextColor(40);
+            doc.text("NCSI Action Plan", data.settings.margin.left, 15);
+        },
+    });
+
+    doc.save('ncsi-action-plan.pdf');
+  };
+
+  const exportToExcel = () => {
+    const processedData = processDataWithSerialNumbers(parsedData);
+    const worksheet = XLSX.utils.json_to_sheet(processedData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Data");
+    XLSX.writeFile(workbook, "ncsi-action-plan.xlsx");
   };
 
   const renderCellContent = (rowIndex: number, header: string, cellValue: any) => {
@@ -332,6 +370,7 @@ export default function Home() {
       </header>
       <main className="flex-1 container mx-auto p-4 md:p-8">
         <div className="grid gap-8">
+          <div className="grid md:grid-cols-2 gap-8">
             <Card className="shadow-md">
               <CardHeader>
                 <CardTitle className="text-xl flex items-center gap-2">
@@ -343,6 +382,22 @@ export default function Home() {
                 <FileUploader onFileSelect={handleFileSelect} onFileRemove={resetState} selectedFile={file} />
               </CardContent>
             </Card>
+            <Card className="shadow-md">
+              <CardHeader>
+                <CardTitle className="text-xl flex items-center gap-2">
+                  <Download className="w-5 h-5" /> Export Data
+                </CardTitle>
+                <CardDescription>Download the table data in your preferred format.</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <p className="text-sm text-muted-foreground mb-4">Export the current table data (including any edits you've made) to a PDF or Excel file.</p>
+              </CardContent>
+              <CardFooter className="flex gap-4">
+                <Button onClick={exportToPDF} variant="outline">Export to PDF</Button>
+                <Button onClick={exportToExcel} variant="outline">Export to Excel</Button>
+              </CardFooter>
+            </Card>
+          </div>
           
           {isLoading && (
             <div className="flex items-center justify-center gap-3 text-lg font-medium text-primary">
@@ -378,3 +433,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
